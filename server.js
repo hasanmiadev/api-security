@@ -3,21 +3,35 @@ const cors = require('cors');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
 
+// Create Express application
 const app = express();
 
-app.use([cors(), morgan('dev'), express.json()])
+// Middleware
+app.use(cors()); // Enable Cross-Origin Resource Sharing
+app.use(morgan('dev')); // Log HTTP requests to the console
+app.use(express.json()); // Parse JSON data in the request body
 
-app.use('/auth', require('./authRoutes'))
-app.use('/', require('./appRoutes'))
+// Routes
+app.use('/auth', require('./authRoutes'));
+app.use('/', require('./appRoutes'));
 
-app.use('/health', (_req, res)=> {
-    res.status(200).json({status: "OK"})
-})
+// Health check route
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'OK' });
+});
 
-
-mongoose.connect('mongodb://127.0.0.1:27017/api-security').then(()=> {
+// Connect to MongoDB and start the server
+mongoose
+  .connect('mongodb://127.0.0.1:27017/api-security', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
     app.listen(4000, () => {
-        console.log('Server Listening on http://localhost:4000');
+      console.log('Server listening on http://localhost:4000');
     });
-    console.log("Database Connected");
-})
+    console.log('Database connected');
+  })
+  .catch((error) => {
+    console.error('Error connecting to database:', error);
+  });
